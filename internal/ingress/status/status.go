@@ -274,6 +274,9 @@ func (s *statusSync) runningAddresses() ([]string, error) {
 		return nil, err
 	}
 
+	// glog.Infof("updating Ingress %v/%v status to %v", currIng.Namespace, currIng.Name, status)
+	glog.Infof("taras updating Ingress len(pods)=%v", len(pods.Items))
+
 	for _, pod := range pods.Items {
 		// only Running pods are valid
 		if pod.Status.Phase != apiv1.PodRunning {
@@ -281,6 +284,8 @@ func (s *statusSync) runningAddresses() ([]string, error) {
 		}
 
 		name := k8s.GetNodeIPOrName(s.Client, pod.Spec.NodeName, s.UseNodeInternalIP)
+		glog.Infof("taras GetNodeIPOrName-> %v", name)
+
 		if !sliceutils.StringInSlice(name, addrs) {
 			addrs = append(addrs, name)
 		}
@@ -359,7 +364,7 @@ func runUpdate(ing *extensions.Ingress, status []apiv1.LoadBalancerIngress,
 			return nil, errors.Wrap(err, fmt.Sprintf("unexpected error searching Ingress %v/%v", ing.Namespace, ing.Name))
 		}
 
-		glog.Infof("updating Ingress %v/%v status to %v", currIng.Namespace, currIng.Name, status)
+		glog.Infof("taras updating Ingress %v/%v status to %v", currIng.Namespace, currIng.Name, status)
 		currIng.Status.LoadBalancer.Ingress = status
 		_, err = ingClient.UpdateStatus(currIng)
 		if err != nil {
